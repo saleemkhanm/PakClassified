@@ -5,6 +5,64 @@ const Advertisment = require("../Models/AdvertismentModel");
 
 
 // CREATE
+// const Create = expressAsyncHandler(async (req, res) => {
+//   const {
+//     name,
+//     price,
+//     description,
+//     feature,
+//     starton,
+//     endon,
+//     cityareaid,
+//     advertismenttypeid,
+//     advertismentcategory,
+//   } = req.body;
+
+//   if (!req.file) {
+//     res.status(400);
+//     throw new Error("Advertisement image is required");
+//   }
+
+//   if (
+//     !name ||
+//     !price ||
+//     !description ||
+//     !feature||
+//     !starton ||
+//     !endon ||
+//     !cityareaid ||
+//     !advertismenttypeid ||
+//     !advertismentcategory
+//   ) {
+//     res.status(400);
+//     throw new Error("All fields are required");
+//   }
+
+//   const defaultStatusId = new mongoose.Types.ObjectId();
+//   const defaultUserId = new mongoose.Types.ObjectId();
+
+//   const advertisment = await Advertisment.create({
+//     name,
+//     price,
+//     description,
+//     feature,
+//     starton,
+//     endon,
+//     advertismentimgid: req.file.filename,
+//     cityareaid,
+//     advertismentstatusid: defaultStatusId,
+//     advertismenttypeid,
+//     advertismentcategory,
+//     userid: defaultUserId,
+//   });
+
+//   res.status(201).json({
+//     message: "Advertisment Created Successfully",
+//     advertisment,
+//   });
+// });
+// ... existing imports
+
 const Create = expressAsyncHandler(async (req, res) => {
   const {
     name,
@@ -16,6 +74,7 @@ const Create = expressAsyncHandler(async (req, res) => {
     cityareaid,
     advertismenttypeid,
     advertismentcategory,
+    userid, // <--- Get this from the request body or auth middleware
   } = req.body;
 
   if (!req.file) {
@@ -23,23 +82,13 @@ const Create = expressAsyncHandler(async (req, res) => {
     throw new Error("Advertisement image is required");
   }
 
-  if (
-    !name ||
-    !price ||
-    !description ||
-    !feature||
-    !starton ||
-    !endon ||
-    !cityareaid ||
-    !advertismenttypeid ||
-    !advertismentcategory
-  ) {
+  // Check all fields
+  if (!name || !price || !description || !feature || !starton || !endon || !cityareaid || !advertismenttypeid || !advertismentcategory || !userid) {
     res.status(400);
-    throw new Error("All fields are required");
+    throw new Error("All fields including User ID are required");
   }
 
   const defaultStatusId = new mongoose.Types.ObjectId();
-  const defaultUserId = new mongoose.Types.ObjectId();
 
   const advertisment = await Advertisment.create({
     name,
@@ -53,7 +102,7 @@ const Create = expressAsyncHandler(async (req, res) => {
     advertismentstatusid: defaultStatusId,
     advertismenttypeid,
     advertismentcategory,
-    userid: defaultUserId,
+    userid: userid, // <--- Now saving the real User ID
   });
 
   res.status(201).json({
@@ -62,6 +111,7 @@ const Create = expressAsyncHandler(async (req, res) => {
   });
 });
 
+// ... rest of the file stays same
 
 // GET ALL
 const GetAll = expressAsyncHandler(async (req, res) => {

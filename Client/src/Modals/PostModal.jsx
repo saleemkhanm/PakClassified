@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
@@ -7,9 +8,7 @@ import axios from "axios";
 import { useForm } from "react-hook-form";
 import { useSelector } from "react-redux";
 
-const PostModal = ({ show, handleClose }) => {
-
-  // ✅ Redux user (CORRECT PLACE)
+const PostModal = ({ show, handleClose, editData }) => {
   const user = useSelector((state) => state.user.user);
 
   const {
@@ -24,118 +23,133 @@ const PostModal = ({ show, handleClose }) => {
   const [type, setType] = useState([]);
   const [imageFile, setImageFile] = useState(null);
 
+  // LOAD DROPDOWNS
   useEffect(() => {
     axios.get("http://localhost:3000/api/v1/category")
-      .then(res => setCategories(res.data))
-      .catch(err => console.log(err));
+      .then(res => setCategories(res.data));
 
     axios.get("http://localhost:3000/api/v1/cityarea")
-      .then(res => setCity(res.data))
-      .catch(err => console.log(err));
+      .then(res => setCity(res.data));
 
     axios.get("http://localhost:3000/api/v1/type")
-      .then(res => setType(res.data.advertismentType))
-      .catch(err => console.log(err));
+      .then(res => setType(res.data.advertismentType || []));
   }, []);
 
-  // ✅ FORM SUBMIT
+  // PREFILL DATA WHEN EDIT
+  useEffect(() => {
+    if (editData) {
+      reset({
+        name: editData.name,
+        price: editData.price,
+        description: editData.description,
+        feature: editData.feature,
+        starton: editData.starton?.slice(0, 10),
+        endon: editData.endon?.slice(0, 10),
+        cityareaid: editData.cityareaid?._id || editData.cityareaid,
+        advertismenttypeid: editData.advertismenttypeid?._id || editData.advertismenttypeid,
+        advertismentcategory: editData.advertismentcategory?._id || editData.advertismentcategory,
+      });
+    } else {
+      reset(); // for new post
+    }
+  }, [editData, reset]);
+
+  //  SUBMIT (CREATE + UPDATE)
   const formSubmit = async (data) => {
     try {
-      const formData = new FormData();
-
-      formData.append("name", data.name);
-      formData.append("price", data.price);
-      formData.append("description", data.description);
-      formData.append("feature", data.feature);
-      formData.append("starton", data.starton);
-      formData.append("endon", data.endon);
-      formData.append("cityareaid", data.cityareaid);
-      formData.append("advertismenttypeid", data.advertismenttypeid);
-      formData.append("advertismentcategory", data.advertismentcategory);
-      formData.append("advertismentstatusid", data.advertismentstatusid);
-      formData.append("advertismentimg", imageFile);
-
-      // ✅ SAFE USER ID
-      if (!user) {
-        alert("Please login first");
+      if (!user || !user._id) {
+        alert("Login required");
         return;
       }
 
+      const formData = new FormData();
+      Object.keys(data).forEach((key) => {
+        formData.append(key, data[key]);
+      });
+
       formData.append("userid", user._id);
 
-     const token = localStorage.getItem("token");
+      if (imageFile) {
+        formData.append("advertismentimg", imageFile);
+      }
 
-// append your fields...
+      const token = localStorage.getItem("token");
 
-axios.post(
-  "http://localhost:3000/api/v1/advertisment",
-  formData,
-  {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "multipart/form-data",
-    },
-  }
-);
+      // MAIN FIX: CONDITION
+      if (editData) {
+        // UPDATE
+        await axios.put(
+          `http://localhost:3000/api/v1/advertisment/${editData._id}`,
+          data, //  no formData needed unless image updating
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
-      alert("Advertisement Posted Successfully");
-      reset();
+        alert("Updated Successfully");
+      } else {
+        // CREATE
+        await axios.post(
+          "http://localhost:3000/api/v1/advertisment",
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        alert("Created Successfully");
+      }
+
       handleClose();
+      reset();
 
     } catch (error) {
-      console.error(error.response?.data || error);
-      alert("Error while posting advertisement");
+      console.log(error);
+      alert("Error occurred");
     }
   };
 
   return (
     <Modal show={show} onHide={handleClose}>
       <Modal.Header closeButton>
-        <Modal.Title className="text-success fw-bolder">
-          Post Advertisement
+        <Modal.Title>
+          {editData ? "Update Advertisement" : "Post Advertisement"}
         </Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
         <Form onSubmit={handleSubmit(formSubmit)}>
-
           <Form.Group className="mb-3">
             <Form.Label>Name</Form.Label>
-            <Form.Control {...register("name", { required: "Name is required" })} />
-            {errors.name && <div className="text-danger">{errors.name.message}</div>}
+            <Form.Control {...register("name", { required: true })} />
           </Form.Group>
 
           <Form.Group className="mb-3">
             <Form.Label>Price</Form.Label>
-            <Form.Control type="number" {...register("price", { required: "Price is required" })} />
-            {errors.price && <div className="text-danger">{errors.price.message}</div>}
+            <Form.Control type="number" {...register("price", { required: true })} />
           </Form.Group>
 
           <Form.Group className="mb-3">
             <Form.Label>Description</Form.Label>
-            <Form.Control as="textarea" rows={2} {...register("description", { required: "Description is required" })} />
-            {errors.description && <div className="text-danger">{errors.description.message}</div>}
+            <Form.Control as="textarea" {...register("description")} />
           </Form.Group>
 
           <Form.Group className="mb-3">
             <Form.Label>Features</Form.Label>
-            <Form.Control as="textarea" rows={2} {...register("feature", { required: "Features is required" })} />
-            {errors.feature && <div className="text-danger">{errors.feature.message}</div>}
+            <Form.Control as="textarea" {...register("feature")} />
           </Form.Group>
 
           <Row>
             <Col>
-              <Form.Group className="mb-3">
-                <Form.Label>Starts On</Form.Label>
-                <Form.Control type="date" {...register("starton", { required: "Required" })} />
-              </Form.Group>
+              <Form.Control type="date" {...register("starton")} />
             </Col>
-
             <Col>
-              <Form.Group className="mb-3">
-                <Form.Label>Ends On</Form.Label>
-                <Form.Control type="date" {...register("endon", { required: "Required" })} />
-              </Form.Group>
+              <Form.Control type="date" {...register("endon")} />
             </Col>
           </Row>
 
@@ -177,19 +191,20 @@ axios.post(
             </Col>
           </Row>
 
-          <Form.Group className="mb-3">
-            <Form.Label>Image</Form.Label>
+
+          {/* IMAGE OPTIONAL IN UPDATE */}
+          {!editData && (
             <Form.Control
               type="file"
+              className="mt-3"
               onChange={(e) => setImageFile(e.target.files[0])}
               required
             />
-          </Form.Group>
+          )}
 
-          <Button variant="success" type="submit">
-            Post Advertisement
+          <Button type="submit" className="mt-3">
+            {editData ? "Update" : "Post Advertisement"}
           </Button>
-
         </Form>
       </Modal.Body>
     </Modal>

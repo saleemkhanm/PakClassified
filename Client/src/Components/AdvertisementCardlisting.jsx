@@ -1,34 +1,4 @@
 
-// import { useState, useEffect } from "react";
-// import { AdvertisementCards } from './AdvertisementCards'
-// import { Row, Col } from "react-bootstrap";
-
-// const AdvertisementCardlisting = () => {
-//     const [category, setCategory] = useState([]);
-
-//     useEffect(() => {
-//         fetch("http://localhost:3000/api/v1/category")
-//             .then((response) => response.json())
-//             .then((jsonData) => {
-//                 console.log(jsonData);
-//                 setCategory(jsonData);
-//             })
-//             .catch((err) => console.log(err.message));
-//     }, []);
-
-//     return (
-//         <Row>
-//             {category.length > 0 &&
-//                 category.map((item, index) => (
-//                     <Col key={index} md={12}>
-//                         <AdvertisementCards items={item} />
-//                     </Col>
-//                 ))}
-//         </Row>
-//     );
-// };
-
-// export default AdvertisementCardlisting
 import { useState, useEffect } from "react";
 import { AdvertisementCards } from "./AdvertisementCards";
 import { Row, Col } from "react-bootstrap";

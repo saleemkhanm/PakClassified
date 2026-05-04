@@ -11,6 +11,9 @@ import { advertismentContext } from "./Context/context";
 import { useState } from "react";
 
 import CategoryDetail from "./Components/CategoryDetail";
+import Update from "./Components/Update";
+import UserProfile from "./Components/UserProfile";
+import LoginModal from "./Modals/LoginModal";
 
 const App = () => {
   const [selectedAd, setSelectedAd] = useState(null);
@@ -24,9 +27,12 @@ const App = () => {
             <Route path="home" element={<Home />} />
             <Route path="about" element={<AboutUs />} />
             <Route path="contact" element={<Contact />} />
-
+            <Route path="/update/:id" element={<Update />} />
             <Route path="category/:id" element={<CategoryDetail />} />
             <Route path="details/:id" element={<CategoryDetail />} />
+            <Route path="/login" element={<LoginModal />} />
+
+            <Route path="/profile" element={<UserProfile />} />
           </Route>
         </Routes>
       </BrowserRouter>

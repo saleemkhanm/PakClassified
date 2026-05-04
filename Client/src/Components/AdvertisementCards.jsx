@@ -24,7 +24,7 @@ const navigate=useNavigate();
 
         </Card.Text>
       </Card.Body>
-    </Card>
+    </Card> 
 
 
 )};

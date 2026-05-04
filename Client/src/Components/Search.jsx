@@ -2,11 +2,13 @@ import { useState, useEffect } from "react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import { FaSearch } from "react-icons/fa";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const Search = () => {
   const [categories, setCategories] = useState([]);
   const [city, setCity] = useState([]);
   const [keyword, setKeyword] = useState("");
+  const navigate = useNavigate(); //  FIX ADDED
 
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
@@ -107,6 +109,9 @@ const Search = () => {
                 />
                 <h5>{item.name}</h5>
                 <p>{item.price}</p>
+                <Button variant="primary" onClick={() => navigate(`/details/${item._id}`)}>
+                  More Details
+                </Button>
               </div>
             </Col>
           ))

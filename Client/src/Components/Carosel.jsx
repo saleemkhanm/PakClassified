@@ -4,8 +4,8 @@ import { Button } from 'react-bootstrap';
 const Carosel = () => {
     return (
         <>
-
-            <Carousel>
+            {/*By Default its 3 second */}
+            <Carousel interval={4000}>
                 <Carousel.Item className='imgg'>
                     <img src="/public/Cars Images/cars.png" alt="" style={{ width: "100%" }} />
                     <Carousel.Caption className='txt'>
@@ -36,9 +36,9 @@ const Carosel = () => {
                     <img src="/public/Cars Images/cars.png" alt="" style={{ width: "100%" }} />
                     <Carousel.Caption className='text'>
                         <h2> Advertisement Categories </h2>
-                        
+
                     </Carousel.Caption>
-                    
+
                 </Carousel.Item>
             </Carousel>
 
